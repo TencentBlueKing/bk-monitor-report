@@ -79,30 +79,32 @@ class MonitorReporter:
         try:
             resp = requests.post(self.url, json=data)
         except Exception:
-            logger.exception("data({}) report to {} failed".format(data, self.url))
+            logger.exception("[MonitorReporter]data({}) report to {} failed".format(data, self.url))
             return
 
         if not resp.ok:
-            logger.error(
-                "data({}) report to {} failed, resp: {}".format(
-                    data, self.url, resp.text
-                )
-            )
+            logger.error("[MonitorReporter]data({}) report to {} failed, resp: {}".format(data, self.url, resp.text))
 
-        logger.info("report finish: {}".format(resp.text))
+        logger.info("[MonitorReporter]report finish: {}".format(resp.text))
 
     def _periodic_report(self):
         while True:
+            report_start_time = time.perf_counter()
             try:
                 self.report()
             except Exception:
-                logger.exception("periodic report to {} failed".format(self.url))
+                logger.exception("[MonitorReporter]periodic report to {} failed".format(self.url))
 
-            time.sleep(self.report_interval)
+            report_cost = time.perf_counter() - report_start_time
+            logger.exception("[MonitorReporter]periodic report cost {}s".format(report_cost))
+
+            sleep_interval = self.report_interval - report_cost
+            if sleep_interval > 0:
+                time.sleep()
 
     def start(self):
         if self._report_thread is not None:
-            logger.warning("reporter already started")
+            logger.warning("[MonitorReporter]reporter already started")
             return
 
         self.thread = threading.Thread(target=self._periodic_report, daemon=True)
