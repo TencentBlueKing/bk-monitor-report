@@ -6,7 +6,7 @@ from setuptools import find_packages, setup
 
 here = path.abspath(path.dirname(__file__))
 about = {}
-with open(path.join(here, "bk_monitor_report", "__version__.py"), "r") as f:
+with open(path.join(here, "bk_monitor_report", "__version__.py"), "r", encoding="utf-8") as f:
     exec(f.read(), about)
 
 long_description = "custom reporter python sdk for bk-monitor"
