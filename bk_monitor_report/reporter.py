@@ -100,7 +100,7 @@ class MonitorReporter:
 
             sleep_interval = self.report_interval - report_cost
             if sleep_interval > 0:
-                time.sleep()
+                time.sleep(sleep_interval)
 
     def start(self):
         if self._report_thread is not None:
