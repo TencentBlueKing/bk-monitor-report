@@ -1,3 +1,8 @@
+## 1.0.4
+
+- bugfix
+    - sleep call param error fix
+
 ## 1.0.3
 
 - bugfix
