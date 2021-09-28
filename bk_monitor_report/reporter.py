@@ -87,20 +87,23 @@ class MonitorReporter:
 
         logger.info("[MonitorReporter]report finish: {}".format(resp.text))
 
+    def _periodic_report_helper(self):
+        report_start_time = time.perf_counter()
+        try:
+            self.report()
+        except Exception:
+            logger.exception("[MonitorReporter]periodic report to {} failed".format(self.url))
+
+        report_cost = time.perf_counter() - report_start_time
+        logger.exception("[MonitorReporter]periodic report cost {}s".format(report_cost))
+
+        sleep_interval = self.report_interval - report_cost
+        if sleep_interval > 0:
+            time.sleep(sleep_interval)
+
     def _periodic_report(self):
         while True:
-            report_start_time = time.perf_counter()
-            try:
-                self.report()
-            except Exception:
-                logger.exception("[MonitorReporter]periodic report to {} failed".format(self.url))
-
-            report_cost = time.perf_counter() - report_start_time
-            logger.exception("[MonitorReporter]periodic report cost {}s".format(report_cost))
-
-            sleep_interval = self.report_interval - report_cost
-            if sleep_interval > 0:
-                time.sleep(sleep_interval)
+            self._periodic_report_helper()
 
     def start(self):
         if self._report_thread is not None:
