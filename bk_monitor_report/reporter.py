@@ -105,7 +105,10 @@ class MonitorReporter:
         while True:
             self._periodic_report_helper()
 
-    def start(self):
+    def start(self, *args, **kwargs):
+        """
+        args, kwargs: 可以用于启动reporter时传入自定义参数，如在celery worker中作为signal handler时会用到
+        """
         if self._report_thread is not None:
             logger.warning("[MonitorReporter]reporter already started")
             return

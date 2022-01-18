@@ -41,7 +41,6 @@ reporter.start()
 
 ```python
 from bk_monitor_report import MonitorReporter 
-from bk_monitor_report.contrib.celery import MonitorReportStep
 
 reporter = MonitorReporter(
     data_id=123,  # 监控 Data ID
@@ -53,8 +52,14 @@ MonitorReportStep.setup_reporter(reporter)
 
 # 初始化 celery app
 app = Celery("proj")
-# 设置启动蓝图
+
+# 如果worker非多进程模式，可以设置启动蓝图
+from bk_monitor_report.contrib.celery import MonitorReportStep
 app.steps["worker"].add(MonitorReportStep)
+
+# 如果worker为多进程模式，可以通过监听进程初始化信号进行处理
+from celery.signals import worker_process_init
+worker_process_init.connect(reporter.start, weak=False)
 ```
 
 ### Installation
