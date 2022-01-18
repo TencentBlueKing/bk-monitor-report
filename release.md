@@ -1,3 +1,8 @@
+## 1.0.5
+
+- optimization
+  - update celery worker doc
+
 ## 1.0.4
 
 - bugfix

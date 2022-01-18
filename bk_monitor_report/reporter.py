@@ -105,7 +105,7 @@ class MonitorReporter:
         while True:
             self._periodic_report_helper()
 
-    def start(self):
+    def start(self, *args, **kwargs):
         if self._report_thread is not None:
             logger.warning("[MonitorReporter]reporter already started")
             return

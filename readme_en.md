@@ -55,8 +55,14 @@ MonitorReportStep.setup_reporter(reporter)
 
 # init celery app
 app = Celery("proj")
-# set Blueprint
+
+# set Blueprint if worker pool is not prefork
+from bk_monitor_report.contrib.celery import MonitorReportStep
 app.steps["worker"].add(MonitorReportStep)
+
+# connect worker process init signal if worker pool is prefork
+from celery.signals import worker_process_init 
+worker_process_init.connect(reporter.start, weak=False)
 ```
 
 ### Installation
