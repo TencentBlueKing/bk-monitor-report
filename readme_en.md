@@ -1,4 +1,6 @@
-[![license](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](https://github.com/TencentBlueKing/bk-monitor-report/blob/master/LICENSE.txt)  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/TencentBlueKing/bk-monitor-report/pulls)[![Release Version](https://img.shields.io/badge/release-1.0.1-brightgreen.svg)](https://github.com/TencentBlueKing/bk-monitor-report/releases)[![BK Pipelines Status](https://api.bkdevops.qq.com/process/api/external/pipelines/projects/bkapppipeline/p-8892cf59f0ea4a928234706a232ae3b8/badge?X-DEVOPS-PROJECT-ID=bkapppipeline)](https://api.bkdevops.qq.com/process/api/external/pipelines/projects/bkapppipeline/p-8892cf59f0ea4a928234706a232ae3b8/badge?X-DEVOPS-PROJECT-ID=bkapppipeline)
+[![license](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](https://github.com/TencentBlueKing/bk-monitor-report/blob/master/LICENSE.txt)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/TencentBlueKing/bk-monitor-report/pulls)
+[![BK Pipelines Status](https://api.bkdevops.qq.com/process/api/external/pipelines/projects/bkapppipeline/p-8892cf59f0ea4a928234706a232ae3b8/badge?X-DEVOPS-PROJECT-ID=bkapppipeline)](https://api.bkdevops.qq.com/process/api/external/pipelines/projects/bkapppipeline/p-8892cf59f0ea4a928234706a232ae3b8/badge?X-DEVOPS-PROJECT-ID=bkapppipeline)
 
 [(English Documents Available)](readme_en.md)
 
@@ -72,8 +74,14 @@ MonitorReportStep.setup_reporter(reporter)
 
 # init celery app
 app = Celery("proj")
-# set Blueprint
+
+# set Blueprint if worker pool is not prefork
+from bk_monitor_report.contrib.celery import MonitorReportStep
 app.steps["worker"].add(MonitorReportStep)
+
+# connect worker process init signal if worker pool is prefork
+from celery.signals import worker_process_init 
+worker_process_init.connect(reporter.start, weak=False)
 ```
 
 ### Installation
