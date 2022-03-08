@@ -37,6 +37,24 @@ reporter.report()
 reporter.start()
 ```
 
+### 上报自定义事件
+
+```python
+from bk_monitor_report import MonitorReporter 
+reporter = MonitorReporter(
+    data_id=123,  # 监控 Data ID
+    access_token="xx",  # 自定义上报 Token
+    target="test",   # 上报唯一标志符
+    url="http://xxx:10205/v2/push/",  # 上报地址
+) 
+
+reporter.report_event(
+    name="my_event",   # 事件名
+    content="event content",   # 事件内容
+    dimension={"a": "b"}  # 自定义维度
+)
+```
+
 ### 如何上报 celery worker 进程的数据
 
 ```python
