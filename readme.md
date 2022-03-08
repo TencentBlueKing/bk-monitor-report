@@ -1,5 +1,6 @@
 [![license](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](https://github.com/TencentBlueKing/bk-monitor-report/blob/master/LICENSE.txt)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/TencentBlueKing/bk-monitor-report/pulls)
+[![codecov](https://codecov.io/gh/TencentBlueKing/bk-monitor-report/branch/master/graph/badge.svg?token=ROH54UE7B8)](https://codecov.io/gh/TencentBlueKing/bk-monitor-report)
 [![BK Pipelines Status](https://api.bkdevops.qq.com/process/api/external/pipelines/projects/bkapppipeline/p-8892cf59f0ea4a928234706a232ae3b8/badge?X-DEVOPS-PROJECT-ID=bkapppipeline)](https://api.bkdevops.qq.com/process/api/external/pipelines/projects/bkapppipeline/p-8892cf59f0ea4a928234706a232ae3b8/badge?X-DEVOPS-PROJECT-ID=bkapppipeline)
 
 [(English Documents Available)](readme_en.md)
