@@ -123,10 +123,6 @@ class MonitorReporter:
     def report(self):
         self._report(data=self.generate_report_data())
 
-    def _periodic_report(self):
-        while True:
-            self._periodic_report_helper()
-
     def start(self, *args, **kwargs):
         """
         args, kwargs: 可以用于启动reporter时传入自定义参数，如在celery worker中作为signal handler时会用到
