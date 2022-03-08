@@ -37,6 +37,25 @@ reporter.report()
 reporter.start()
 ```
 
+### Report custom event
+
+```python
+from bk_monitor_report import MonitorReporter 
+
+reporter = MonitorReporter(
+    data_id=123,  # BK-Monitor Data ID
+    access_token="xx",  # custom report Token
+    target="test",   # report identifier
+    url="http://xxx:10205/v2/push/",  # report gateway
+) 
+
+reporter.report_event(
+    name="my_event",   # event name
+    content="event content",   # event content
+    dimension={"a": "b"}  # custom dimensions
+)
+```
+
 ### How to report celery worker's metrics
 
 

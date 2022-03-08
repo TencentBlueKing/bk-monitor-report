@@ -103,3 +103,19 @@ def test_start():
     assert reporter.thread is not None
     threading.Thread.assert_called_once_with(target=reporter._periodic_report, daemon=True)
     reporter.thread.start.assert_called_once()
+
+
+def test_report_event():
+    reporter = MonitorReporter(data_id=1, access_token="token", target="t", url="u")
+    reporter._report = MagicMock()
+
+    reporter.report_event(name="my_event", content="event content", dimension={"a": "b"})
+    reporter._report.assert_called_once()
+    data_args = reporter._report.call_args[1]["data"]
+    assert data_args["data_id"] == reporter.data_id
+    assert data_args["access_token"] == reporter.access_token
+    assert "timestamp" in data_args["data"][0]
+    assert data_args["data"][0]["event_name"] == "my_event"
+    assert data_args["data"][0]["event"]["content"] == "event content"
+    assert data_args["data"][0]["target"] == reporter.target
+    assert data_args["data"][0]["dimension"] == {"a": "b"}

@@ -55,27 +55,7 @@ class MonitorReporter:
         self.report_interval = report_interval
         self._report_thread = None
 
-    def generate_report_data(self):
-        data = {"data_id": self.data_id, "access_token": self.access_token, "data": []}
-        timestamp = round(time.time() * 1000)
-
-        metrics_text = generate_latest(self.registry).decode("utf-8")
-        for family in text_string_to_metric_families(metrics_text):
-            for sample in family.samples:
-                data["data"].append(
-                    {
-                        "metrics": {sample.name: sample.value},
-                        "target": self.target,
-                        "dimension": sample.labels,
-                        "timestamp": timestamp,
-                    }
-                )
-
-        return data
-
-    def report(self):
-        data = self.generate_report_data()
-
+    def _report(self, data: dict):
         try:
             resp = requests.post(self.url, json=data)
         except Exception:
@@ -104,6 +84,44 @@ class MonitorReporter:
     def _periodic_report(self):
         while True:
             self._periodic_report_helper()
+
+    def generate_report_data(self):
+        data = {"data_id": self.data_id, "access_token": self.access_token, "data": []}
+        timestamp = round(time.time() * 1000)
+
+        metrics_text = generate_latest(self.registry).decode("utf-8")
+        for family in text_string_to_metric_families(metrics_text):
+            for sample in family.samples:
+                data["data"].append(
+                    {
+                        "metrics": {sample.name: sample.value},
+                        "target": self.target,
+                        "dimension": sample.labels,
+                        "timestamp": timestamp,
+                    }
+                )
+
+        return data
+
+    def report_event(self, name: str, content: str, dimension: Optional[dict] = None):
+        self._report(
+            data={
+                "data_id": self.data_id,
+                "access_token": self.access_token,
+                "data": [
+                    {
+                        "event_name": name,
+                        "event": {"content": content},
+                        "target": self.target,
+                        "dimension": dimension or {},
+                        "timestamp": round(time.time() * 1000),
+                    }
+                ],
+            }
+        )
+
+    def report(self):
+        self._report(data=self.generate_report_data())
 
     def start(self, *args, **kwargs):
         """

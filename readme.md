@@ -1,5 +1,6 @@
 [![license](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](https://github.com/TencentBlueKing/bk-monitor-report/blob/master/LICENSE.txt)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/TencentBlueKing/bk-monitor-report/pulls)
+[![codecov](https://codecov.io/gh/TencentBlueKing/bk-monitor-report/branch/master/graph/badge.svg?token=ROH54UE7B8)](https://codecov.io/gh/TencentBlueKing/bk-monitor-report)
 [![BK Pipelines Status](https://api.bkdevops.qq.com/process/api/external/pipelines/projects/bkapppipeline/p-8892cf59f0ea4a928234706a232ae3b8/badge?X-DEVOPS-PROJECT-ID=bkapppipeline)](https://api.bkdevops.qq.com/process/api/external/pipelines/projects/bkapppipeline/p-8892cf59f0ea4a928234706a232ae3b8/badge?X-DEVOPS-PROJECT-ID=bkapppipeline)
 
 [(English Documents Available)](readme_en.md)
@@ -35,6 +36,24 @@ reporter.report()
 
 # 启动守护进程周期性自动上报
 reporter.start()
+```
+
+### 上报自定义事件
+
+```python
+from bk_monitor_report import MonitorReporter 
+reporter = MonitorReporter(
+    data_id=123,  # 监控 Data ID
+    access_token="xx",  # 自定义上报 Token
+    target="test",   # 上报唯一标志符
+    url="http://xxx:10205/v2/push/",  # 上报地址
+) 
+
+reporter.report_event(
+    name="my_event",   # 事件名
+    content="event content",   # 事件内容
+    dimension={"a": "b"}  # 自定义维度
+)
 ```
 
 ### 如何上报 celery worker 进程的数据
