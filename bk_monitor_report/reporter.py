@@ -75,9 +75,10 @@ class MonitorReporter:
             logger.exception("[MonitorReporter]periodic report to {} failed".format(self.url))
 
         report_cost = time.perf_counter() - report_start_time
-        logger.exception("[MonitorReporter]periodic report cost {}s".format(report_cost))
+        logger.info("[MonitorReporter]periodic report cost {} seconds".format(report_cost))
 
         sleep_interval = self.report_interval - report_cost
+        logger.info("[MonitorReporter]sleep {} seconds".format(sleep_interval))
         if sleep_interval > 0:
             time.sleep(sleep_interval)
 
