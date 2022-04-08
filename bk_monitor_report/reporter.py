@@ -59,11 +59,11 @@ class MonitorReporter:
         try:
             resp = requests.post(self.url, json=data)
         except Exception:
-            logger.exception("[MonitorReporter]data({}) report to {} failed".format(data, self.url))
+            logger.exception("[MonitorReporter]report fail, url: {}".format(self.url))
             return
 
         if not resp.ok:
-            logger.error("[MonitorReporter]data({}) report to {} failed, resp: {}".format(data, self.url, resp.text))
+            logger.error("[MonitorReporter]report fail, url: {}, resp: {}".format(data, self.url, resp.text))
 
         logger.info("[MonitorReporter]report finish: {}".format(resp.text))
 
@@ -72,7 +72,7 @@ class MonitorReporter:
         try:
             self.report()
         except Exception:
-            logger.exception("[MonitorReporter]periodic report to {} failed".format(self.url))
+            logger.exception("[MonitorReporter]report fail, url: {}".format(self.url))
 
         report_cost = time.perf_counter() - report_start_time
         logger.info("[MonitorReporter]periodic report cost {} seconds".format(report_cost))
