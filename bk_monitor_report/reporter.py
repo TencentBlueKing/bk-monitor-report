@@ -63,7 +63,7 @@ class MonitorReporter:
             return
 
         if not resp.ok:
-            logger.error("[MonitorReporter]report fail, url: {}, resp: {}".format(data, self.url, resp.text))
+            logger.error("[MonitorReporter]report fail, url: {}, resp: {}".format(self.url, resp.text))
 
         logger.info("[MonitorReporter]report finish: {}".format(resp.text))
 
