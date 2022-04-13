@@ -52,7 +52,6 @@ def test_generate_chunked_report_data():
     timestamp = round(time.time() * 1000) - 1
 
     def validate_chunkd(chunks):
-        assert len(chunks) > 0
         for data in chunks:
             assert data["data_id"] == reporter.data_id
             assert data["access_token"] == reporter.access_token
@@ -63,11 +62,13 @@ def test_generate_chunked_report_data():
     # smallest chunk size
     reporter = MonitorReporter(data_id=1, access_token="token", target="t", url="u", chunk_size=1)
     chunks = list(reporter.generate_chunked_report_data())
+    assert len(chunks) > 1
     validate_chunkd(chunks)
 
     # large chunk size
     reporter = MonitorReporter(data_id=1, access_token="token", target="t", url="u", chunk_size=100000)
     chunks = list(reporter.generate_chunked_report_data())
+    assert len(chunks) > 0
     validate_chunkd(chunks)
 
 
