@@ -36,6 +36,7 @@ class MonitorReporter:
         target: str,
         url: str,
         report_interval: int = 60,
+        chunk_size: int = 500,
         registry: Optional[CollectorRegistry] = REGISTRY,
     ):
         """
@@ -53,17 +54,20 @@ class MonitorReporter:
         self.url = url
         self.registry = registry
         self.report_interval = report_interval
+        self.chunk_size = chunk_size
         self._report_thread = None
 
-    def _report(self, data: dict):
+    def _report(self, data: dict, **extras):
         try:
             resp = requests.post(self.url, json=data)
         except Exception:
-            logger.exception("[MonitorReporter]report fail, url: {}".format(self.url))
+            logger.exception("[MonitorReporter]report fail, url: {}, extras: {}".format(self.url, extras))
             return
 
         if not resp.ok:
-            logger.error("[MonitorReporter]report fail, url: {}, resp: {}".format(self.url, resp.text))
+            logger.error(
+                "[MonitorReporter]report fail, url: {}, extras: {}, resp: {}".format(self.url, extras, resp.text)
+            )
 
         logger.info("[MonitorReporter]report finish: {}".format(resp.text))
 
@@ -72,7 +76,7 @@ class MonitorReporter:
         try:
             self.report()
         except Exception:
-            logger.exception("[MonitorReporter]report fail, url: {}".format(self.url))
+            logger.exception("[MonitorReporter]periodic report fail")
 
         report_cost = time.perf_counter() - report_start_time
         logger.info("[MonitorReporter]periodic report cost {} seconds".format(report_cost))
@@ -104,6 +108,31 @@ class MonitorReporter:
 
         return data
 
+    def generate_chunked_report_data(self):
+        timestamp = round(time.time() * 1000)
+
+        data = {"data_id": self.data_id, "access_token": self.access_token, "data": []}
+        size = 0
+
+        metrics_text = generate_latest(self.registry).decode("utf-8")
+        for family in text_string_to_metric_families(metrics_text):
+            for sample in family.samples:
+                data["data"].append(
+                    {
+                        "metrics": {sample.name: sample.value},
+                        "target": self.target,
+                        "dimension": sample.labels,
+                        "timestamp": timestamp,
+                    }
+                )
+
+            size += 1
+            if size % self.chunk_size == 0:
+                yield data
+                data = {"data_id": self.data_id, "access_token": self.access_token, "data": []}
+
+        yield data
+
     def report_event(self, name: str, content: str, dimension: Optional[dict] = None):
         self._report(
             data={
@@ -122,7 +151,8 @@ class MonitorReporter:
         )
 
     def report(self):
-        self._report(data=self.generate_report_data())
+        for i, data in enumerate(self.generate_chunked_report_data(), 1):
+            self._report(data=data, chunk=i)
 
     def start(self, *args, **kwargs):
         """

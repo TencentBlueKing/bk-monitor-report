@@ -11,7 +11,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import time
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, call
 
 from bk_monitor_report.reporter import MonitorReporter
 
@@ -50,35 +50,53 @@ def test_generate_report_data():
 
 def test_report_success():
     reporter = MonitorReporter(data_id=1, access_token="token", target="t", url="u")
-    reporter.generate_report_data = MagicMock(return_value="report_data")
-    post = MagicMock()
+    reporter.generate_chunked_report_data = MagicMock(return_value=["report_data_1", "report_data_2", "report_data_3"])
+    post = MagicMock(return_value=MagicMock(ok=True))
 
     with patch("bk_monitor_report.reporter.requests.post", post):
         reporter.report()
 
-    post.assert_called_once_with(reporter.url, json="report_data")
+    post.assert_has_calls(
+        [
+            call(reporter.url, json="report_data_1"),
+            call(reporter.url, json="report_data_2"),
+            call(reporter.url, json="report_data_3"),
+        ]
+    )
 
 
 def test_report__post_raise():
     reporter = MonitorReporter(data_id=1, access_token="token", target="t", url="u")
-    reporter.generate_report_data = MagicMock(return_value="report_data")
+    reporter.generate_chunked_report_data = MagicMock(return_value=["report_data_1", "report_data_2", "report_data_3"])
     post = MagicMock(side_effect=Exception)
 
     with patch("bk_monitor_report.reporter.requests.post", post):
         reporter.report()
 
-    post.assert_called_once_with(reporter.url, json="report_data")
+    post.assert_has_calls(
+        [
+            call(reporter.url, json="report_data_1"),
+            call(reporter.url, json="report_data_2"),
+            call(reporter.url, json="report_data_3"),
+        ]
+    )
 
 
 def test_report__post_resp_is_not_ok():
     reporter = MonitorReporter(data_id=1, access_token="token", target="t", url="u")
-    reporter.generate_report_data = MagicMock(return_value="report_data")
+    reporter.generate_chunked_report_data = MagicMock(return_value=["report_data_1", "report_data_2", "report_data_3"])
     post = MagicMock(return_value=MagicMock(ok=False))
 
     with patch("bk_monitor_report.reporter.requests.post", post):
         reporter.report()
 
-    post.assert_called_once_with(reporter.url, json="report_data")
+    post.assert_has_calls(
+        [
+            call(reporter.url, json="report_data_1"),
+            call(reporter.url, json="report_data_2"),
+            call(reporter.url, json="report_data_3"),
+        ]
+    )
 
 
 def test___periodic_report_helper():
