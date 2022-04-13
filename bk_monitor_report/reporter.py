@@ -59,9 +59,10 @@ class MonitorReporter:
         self.chunk_size = chunk_size
         self._report_thread = None
 
-    def _report(self, data: dict, **extras):
+    def _report(self, data: dict, session=None, **extras):
+        sender = session or requests
         try:
-            resp = requests.post(self.url, json=data)
+            resp = sender.post(self.url, json=data)
         except Exception:
             logger.exception("[MonitorReporter]report fail, url: {}, extras: {}".format(self.url, extras))
             return
@@ -154,8 +155,13 @@ class MonitorReporter:
         )
 
     def report(self):
+        session = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(pool_connections=1, pool_maxsize=1)
+        session.mount("https://", adapter)
+        session.mount("http://", adapter)
+
         for i, data in enumerate(self.generate_chunked_report_data(), 1):
-            self._report(data=data, chunk=i)
+            self._report(data=data, session=session, chunk=i)
 
     def start(self, *args, **kwargs):
         """

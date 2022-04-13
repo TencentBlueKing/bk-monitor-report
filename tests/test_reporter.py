@@ -77,7 +77,7 @@ def test_report_success():
     reporter.generate_chunked_report_data = MagicMock(return_value=["report_data_1", "report_data_2", "report_data_3"])
     post = MagicMock(return_value=MagicMock(ok=True))
 
-    with patch("bk_monitor_report.reporter.requests.post", post):
+    with patch("bk_monitor_report.reporter.requests.Session.post", post):
         reporter.report()
 
     post.assert_has_calls(
@@ -94,7 +94,7 @@ def test_report__post_raise():
     reporter.generate_chunked_report_data = MagicMock(return_value=["report_data_1", "report_data_2", "report_data_3"])
     post = MagicMock(side_effect=Exception)
 
-    with patch("bk_monitor_report.reporter.requests.post", post):
+    with patch("bk_monitor_report.reporter.requests.Session.post", post):
         reporter.report()
 
     post.assert_has_calls(
@@ -111,7 +111,7 @@ def test_report__post_resp_is_not_ok():
     reporter.generate_chunked_report_data = MagicMock(return_value=["report_data_1", "report_data_2", "report_data_3"])
     post = MagicMock(return_value=MagicMock(ok=False))
 
-    with patch("bk_monitor_report.reporter.requests.post", post):
+    with patch("bk_monitor_report.reporter.requests.Session.post", post):
         reporter.report()
 
     post.assert_has_calls(
