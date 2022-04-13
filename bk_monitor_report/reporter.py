@@ -54,6 +54,8 @@ class MonitorReporter:
         self.url = url
         self.registry = registry
         self.report_interval = report_interval
+        if chunk_size < 1:
+            raise ValueError("chunk_size must greater than 1, receive: {}".format(chunk_size))
         self.chunk_size = chunk_size
         self._report_thread = None
 
@@ -131,7 +133,8 @@ class MonitorReporter:
                 yield data
                 data = {"data_id": self.data_id, "access_token": self.access_token, "data": []}
 
-        yield data
+        if data["data"]:
+            yield data
 
     def report_event(self, name: str, content: str, dimension: Optional[dict] = None):
         self._report(
