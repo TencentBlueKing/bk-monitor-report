@@ -23,7 +23,6 @@ jobs:
 
       - name: Package and Publish
         run: |
-          cd bk-plugin-framework
           poetry build -vvv
           poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
           poetry publish
