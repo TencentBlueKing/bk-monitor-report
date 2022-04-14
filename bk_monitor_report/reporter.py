@@ -12,6 +12,7 @@ specific language governing permissions and limitations under the License.
 """
 
 import time
+import socket
 import logging
 import threading
 from typing import Optional
@@ -57,6 +58,7 @@ class MonitorReporter:
         if chunk_size < 1:
             raise ValueError("chunk_size must greater than 1, receive: {}".format(chunk_size))
         self.chunk_size = chunk_size
+        self._hostname = socket.gethostname()
         self._report_thread = None
 
     def _report(self, data: dict, session=None, **extras):
@@ -64,28 +66,32 @@ class MonitorReporter:
         try:
             resp = sender.post(self.url, json=data)
         except Exception:
-            logger.exception("[MonitorReporter]report fail, url: {}, extras: {}".format(self.url, extras))
+            logger.exception(
+                "[MonitorReporter]report fail at {}, url: {}, extras: {}".format(self._hostname, self.url, extras)
+            )
             return
 
         if not resp.ok:
             logger.error(
-                "[MonitorReporter]report fail, url: {}, extras: {}, resp: {}".format(self.url, extras, resp.text)
+                "[MonitorReporter]report fail at {}, url: {}, extras: {}, resp: {}, data: {}".format(
+                    self._hostname, self.url, extras, resp.text, data
+                )
             )
 
-        logger.info("[MonitorReporter]report finish: {}".format(resp.text))
+        logger.info("[MonitorReporter]report finish at {}: {}".format(self._hostname, resp.text))
 
     def _periodic_report_helper(self):
         report_start_time = time.perf_counter()
         try:
             self.report()
         except Exception:
-            logger.exception("[MonitorReporter]periodic report fail")
+            logger.exception("[MonitorReporter]periodic report fail at {}".format(self._hostname))
 
         report_cost = time.perf_counter() - report_start_time
-        logger.info("[MonitorReporter]periodic report cost {} seconds".format(report_cost))
+        logger.info("[MonitorReporter]periodic report cost {} seconds at {}".format(report_cost, self._hostname))
 
         sleep_interval = self.report_interval - report_cost
-        logger.info("[MonitorReporter]sleep {} seconds".format(sleep_interval))
+        logger.info("[MonitorReporter]sleep {} seconds at {}".format(sleep_interval, self._hostname))
         if sleep_interval > 0:
             time.sleep(sleep_interval)
 
@@ -128,11 +134,10 @@ class MonitorReporter:
                         "timestamp": timestamp,
                     }
                 )
-
-            size += 1
-            if size % self.chunk_size == 0:
-                yield data
-                data = {"data_id": self.data_id, "access_token": self.access_token, "data": []}
+                size += 1
+                if size % self.chunk_size == 0:
+                    yield data
+                    data = {"data_id": self.data_id, "access_token": self.access_token, "data": []}
 
         if data["data"]:
             yield data
@@ -168,7 +173,7 @@ class MonitorReporter:
         args, kwargs: 可以用于启动reporter时传入自定义参数，如在celery worker中作为signal handler时会用到
         """
         if self._report_thread is not None:
-            logger.warning("[MonitorReporter]reporter already started")
+            logger.warning("[MonitorReporter]reporter already started at {}".format(self._hostname))
             return
 
         self.thread = threading.Thread(target=self._periodic_report, daemon=True)
