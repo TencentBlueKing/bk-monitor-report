@@ -58,7 +58,7 @@ class MonitorReporter:
         if chunk_size < 1:
             raise ValueError("chunk_size must greater than 1, receive: {}".format(chunk_size))
         self.chunk_size = chunk_size
-        self._hostname = socket.gethostbyname()
+        self._hostname = socket.gethostname()
         self._report_thread = None
 
     def _report(self, data: dict, session=None, **extras):
